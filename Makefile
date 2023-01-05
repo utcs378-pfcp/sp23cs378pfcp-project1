@@ -1,0 +1,38 @@
+#If you have installed BLIS in a directory other than your home directory, set the HOME accordingly
+#HOME      := /path_to_blis
+
+# Make sure you have BLIS installed in your home directory
+BLIS_LIB  := $(HOME)/blis/lib/libblis.a
+BLIS_INC  := $(HOME)/blis/include/blis
+
+# indicate how the object files are to be created
+CC         := gcc-12
+LINKER     := $(CC)
+CFLAGS     := -O3 -I$(BLAS_INC) -m64 -mavx2 -std=c99 -march=native -fopenmp -D_POSIX_C_SOURCE=200809L
+FFLAGS     := $(CFLAGS) 
+
+# set the range of experiments to be performed
+NREPEATS   := 3#      number of times each experiment is repeated.  The best time is reported.
+NFIRST     := 48#     smallest size to be timed.
+NLAST_SMALL:= 500#    largest size to be timed for slow implementations.
+NLAST      := 1500#   largest size to be timed for fast implementations.
+NINC       := 48#     increment between sizes.
+
+LDFLAGS    := -lpthread -m64 -lm -fopenmp
+
+UTIL_OBJS  := FLA_Clock.o MaxAbsDiff.o RandomMatrix.o
+
+# ---------------------
+
+OBJS_IJP := driver.o Gemm_IJP.o
+
+driver_IJP.x: $(OBJS_IJP) $(UTIL_OBJS)
+	$(LINKER) $(OBJS_IJP) $(UTIL_OBJS) $(BLIS_LIB) -o driver_IJP.x $(LDFLAGS) 
+
+IJP: driver_IJP.x
+	echo "$(NREPEATS) $(NFIRST) $(NLAST_SMALL) $(NINC)" | ./driver_IJP.x > data/output_IJP.m 
+	tail data/output_IJP.m 
+
+# ---------------------                                                               
+clean:
+	rm -f *.o *~ core *.x *.pdf
