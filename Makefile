@@ -6,9 +6,9 @@ BLIS_LIB  := $(HOME)/blis/lib/libblis.a
 BLIS_INC  := $(HOME)/blis/include/blis
 
 # indicate how the object files are to be created
-CC         := gcc-12
+CC         := gcc
 LINKER     := $(CC)
-CFLAGS     := -O3 -I$(BLAS_INC) -m64 -mavx2 -std=c99 -march=native -fopenmp -D_POSIX_C_SOURCE=200809L
+CFLAGS     := -O3 -I$(BLIS_INC) -m64 -mavx2 -std=c99 -march=native -fopenmp -D_POSIX_C_SOURCE=200809L
 FFLAGS     := $(CFLAGS) 
 
 # set the range of experiments to be performed
@@ -17,6 +17,13 @@ NFIRST     := 48#     smallest size to be timed.
 NLAST_SMALL:= 500#    largest size to be timed for slow implementations.
 NLAST      := 1500#   largest size to be timed for fast implementations.
 NINC       := 48#     increment between sizes.
+
+
+# This is a sample of how you would pass in the matrix sizes as compile time defines.
+PSIZE_CORR := -DNREPEATS=3   \
+              -DNFIRST=48 \
+              -DNLAST=500 \
+              -DNINC=48
 
 LDFLAGS    := -lpthread -m64 -lm -fopenmp
 
@@ -30,9 +37,8 @@ driver_IJP.x: $(OBJS_IJP) $(UTIL_OBJS)
 	$(LINKER) $(OBJS_IJP) $(UTIL_OBJS) $(BLIS_LIB) -o driver_IJP.x $(LDFLAGS) 
 
 IJP: driver_IJP.x
-	echo "$(NREPEATS) $(NFIRST) $(NLAST_SMALL) $(NINC)" | ./driver_IJP.x > data/output_IJP.m 
-	tail data/output_IJP.m 
+	echo "$(NREPEATS) $(NFIRST) $(NLAST_SMALL) $(NINC)" | ./driver_IJP.x  
 
 # ---------------------                                                               
 clean:
-	rm -f *.o *~ core *.x *.pdf
+	rm -f *.o *~ core *.x
