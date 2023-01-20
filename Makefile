@@ -6,7 +6,7 @@ BLIS_LIB  := $(HOME)/blis/lib/libblis.a
 BLIS_INC  := $(HOME)/blis/include/blis
 
 # indicate how the object files are to be created
-CC         := gcc-12
+CC         := gcc
 LINKER     := $(CC)
 CFLAGS     := -O3 -I$(BLIS_INC) -m64 -mavx2 -std=c99 -march=native -fopenmp -D_POSIX_C_SOURCE=200809L
 FFLAGS     := $(CFLAGS) 
